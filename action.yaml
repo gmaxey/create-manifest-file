@@ -1,0 +1,22 @@
+apiVersion: automation.cloudbees.io/v1alpha1
+kind: action
+name: Create manifest file from base manifest and current environment
+inputs:
+  base-manifest:
+    description: "Manifest of components' artifact versions, no environment"
+    required: true
+  environment:
+    required: true
+  file:
+    required: true
+    default: manifest.yaml
+
+runs:
+  using: "composite"
+  steps:
+    - name: Update manifest file with environment
+      uses: docker://figured/alpine-curl-jq-bash
+      shell: bash
+      run: |
+        echo '${{ inputs.base-manifest }}' | \
+        jq -c '.[].inputs.environment="${{ inputs.environment }}"' | tee ${{ inputs.file }}
